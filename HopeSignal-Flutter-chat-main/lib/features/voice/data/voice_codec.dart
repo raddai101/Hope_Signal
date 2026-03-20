@@ -25,7 +25,7 @@ class VoiceCodec {
   }
 
   // C fonctions attendues
-  static late final int Function(Pointer<Uint8>, Int32, Pointer<Uint8>, Int32)
+  static late final int Function(Pointer<Uint8>, int, Pointer<Uint8>, int)
   _compressNative = _instance
       .lookup<
         NativeFunction<
@@ -34,7 +34,7 @@ class VoiceCodec {
       >('compress_audio')
       .asFunction();
 
-  static late final int Function(Pointer<Uint8>, Int32, Pointer<Uint8>, Int32)
+  static late final int Function(Pointer<Uint8>, int, Pointer<Uint8>, int)
   _decompressNative = _instance
       .lookup<
         NativeFunction<

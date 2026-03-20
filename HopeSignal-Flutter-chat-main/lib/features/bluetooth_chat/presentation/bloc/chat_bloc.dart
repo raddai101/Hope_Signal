@@ -25,9 +25,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     // 2. Envoi d'un message TEXTE (Bluetooth + UI)
     on<SendTextMessageEvent>((event, emit) async {
       if (event.text.isNotEmpty) {
+        print("📤 Tentative envoi texte: '${event.text}'");
         try {
           // Envoi réel via le repository (Bluetooth/ESP32)
           await repository.sendMessage(event.text);
+          print("✅ Texte envoyé avec succès");
 
           final myMsg = BleMessage(
             id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -39,9 +41,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
           // Mise à jour de l'UI
           emit(state.copyWith(messages: [myMsg, ...state.messages]));
+          print("📱 Message ajouté à l'UI");
         } catch (e) {
+          print("❌ Erreur envoi texte: $e");
           emit(state.copyWith(error: "Échec de l'envoi : $e"));
         }
+      } else {
+        print("⚠️ Texte vide, pas d'envoi");
       }
     });
 

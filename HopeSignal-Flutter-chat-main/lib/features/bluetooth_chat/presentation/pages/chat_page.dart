@@ -364,10 +364,17 @@ class _ChatPageState extends State<ChatPage>
 
   void _sendMessage() {
     final text = _controller.text.trim();
+    print(
+      "🔤 _sendMessage appelée avec: '${_controller.text}' -> trim: '$text'",
+    );
     if (text.isNotEmpty) {
+      print("📤 Envoi event SendTextMessageEvent: '$text'");
       context.read<ChatBloc>().add(SendTextMessageEvent(text));
       _controller.clear();
+      print("🧹 Champ de texte effacé");
       _scrollToBottom();
+    } else {
+      print("⚠️ Texte vide après trim, pas d'envoi");
     }
   }
 }

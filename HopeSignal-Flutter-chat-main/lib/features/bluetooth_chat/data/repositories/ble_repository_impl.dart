@@ -51,6 +51,9 @@ class BleRepositoryImpl implements BleRepository {
         seq,
         chunk,
       );
+      print(
+        "📤 TEXTE envoyé via BT: seq=$seq, size=${chunk.length}, packet=${packet.length} bytes",
+      );
       await _sendWithAck(packet, seq);
       seq = (seq + 1) & 0xFF;
     }
@@ -64,19 +67,36 @@ class BleRepositoryImpl implements BleRepository {
     }
 
     final fileRaw = await file.readAsBytes();
+    print("🎵 AUDIO brut lu: ${fileRaw.length} bytes");
+
     final compressed = VoiceManager.compressAudio(Uint8List.fromList(fileRaw));
+    print(
+      "🗜️ AUDIO compressé: ${compressed.length} bytes (ratio: ${(compressed.length / fileRaw.length * 100).toStringAsFixed(1)}%)",
+    );
+
     final chunks = VoiceManager.chunkPayload(compressed);
+    print(
+      "📦 AUDIO divisé en ${chunks.length} chunks de max ${VoiceManager.maxChunkSize} bytes",
+    );
+
     int seq = 0;
 
-    for (final chunk in chunks) {
+    for (int i = 0; i < chunks.length; i++) {
+      final isLast = (i == chunks.length - 1);
       final packet = VoiceManager.buildPacket(
         VoiceManager.flagAudio,
         seq,
-        chunk,
+        chunks[i],
+        isLastChunk: isLast,
+      );
+      print(
+        "📤 Envoi chunk audio $i/${chunks.length - 1} (seq:$seq, last:$isLast, size:${chunks[i].length})",
       );
       await _sendWithAck(packet, seq);
       seq = (seq + 1) & 0xFF;
     }
+
+    print("✅ AUDIO envoyé complètement");
   }
 
   Future<void> _sendWithAck(Uint8List packet, int seq) async {
@@ -113,7 +133,7 @@ class BleRepositoryImpl implements BleRepository {
       }
     }
 
-    // Flux de paquets [flag,seq,payload...,crc]
+    // Traiter comme paquet binaire (ESP32 trans.ino envoie des paquets [flag, seq, payload..., crc])
     if (bytes.length >= 3 && VoiceManager.verifyPacket(bytes)) {
       final flag = bytes[0];
       final payload = bytes.sublist(2, bytes.length - 1);
@@ -124,15 +144,19 @@ class BleRepositoryImpl implements BleRepository {
       String text = '';
       if (type == MessageType.text) {
         text = utf8.decode(payload, allowMalformed: true);
+        print("📥 TEXTE reçu via BT: '$text'");
       } else {
         try {
           final decompressed = VoiceManager.decompressAudio(
             Uint8List.fromList(payload),
           );
           text = 'AUDIO_CHUNK_${decompressed.length}';
-          // Optionnel: stocker chunk pour reconstitution dans un manager.
+          print(
+            "📥 AUDIO chunk reçu: ${payload.length} bytes compressés -> ${decompressed.length} bytes décompressés",
+          );
         } catch (_) {
           text = 'AUDIO_CHUNK_NON_DECOMPRESSIBLE';
+          print("❌ Erreur décompression audio chunk");
         }
       }
 
@@ -145,6 +169,10 @@ class BleRepositoryImpl implements BleRepository {
       );
 
       _incomingController.add([message]);
+    } else {
+      print(
+        "⚠️ Données reçues non reconnues: ${bytes.length} bytes, premier byte: ${bytes.isNotEmpty ? bytes[0] : 'N/A'}",
+      );
     }
   }
 

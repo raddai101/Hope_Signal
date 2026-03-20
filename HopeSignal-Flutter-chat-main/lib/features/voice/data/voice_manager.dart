@@ -25,7 +25,12 @@ class VoiceManager {
     return crc;
   }
 
-  static Uint8List buildPacket(int flag, int seq, Uint8List payload, {bool isLastChunk = true}) {
+  static Uint8List buildPacket(
+    int flag,
+    int seq,
+    Uint8List payload, {
+    bool isLastChunk = true,
+  }) {
     final packet = BytesBuilder();
     packet.add([flag]);
     packet.add([seq & 0xFF]);
@@ -67,9 +72,12 @@ class VoiceManager {
     return crc8(payloadSegment) == crcReceived;
   }
 
-  static bool isTextPacket(Uint8List packet) => packet.isNotEmpty && packet[0] == flagText;
-  static bool isAudioPacket(Uint8List packet) => packet.isNotEmpty && packet[0] == flagAudio;
-  static bool isLastAudioChunk(Uint8List packet) => packet.length > 2 && packet[2] == 1;
+  static bool isTextPacket(Uint8List packet) =>
+      packet.isNotEmpty && packet[0] == flagText;
+  static bool isAudioPacket(Uint8List packet) =>
+      packet.isNotEmpty && packet[0] == flagAudio;
+  static bool isLastAudioChunk(Uint8List packet) =>
+      packet.length > 2 && packet[2] == 1;
 
   static VoiceMessage parseIncomingPacket(Uint8List packet) {
     if (!verifyPacket(packet)) {
@@ -100,22 +108,6 @@ class VoiceManager {
       timestamp: DateTime.now(),
       isFromMe: false,
     );
-  }
-        id: DateTime.now().microsecondsSinceEpoch.toString(),
-        data: payload,
-        type: VoicePacketType.text,
-        timestamp: DateTime.now(),
-        isFromMe: false,
-      );
-    } else {
-      return VoiceMessage(
-        id: DateTime.now().microsecondsSinceEpoch.toString(),
-        data: payload,
-        type: VoicePacketType.audio,
-        timestamp: DateTime.now(),
-        isFromMe: false,
-      );
-    }
   }
 
   static Uint8List compressAudio(Uint8List raw) {
