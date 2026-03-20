@@ -1,0 +1,53 @@
+name: hope_signal_chat
+description: "A new Flutter project."
+
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  flutter_bloc: ^9.1.1
+  google_fonts: ^8.0.2
+  provider: ^6.0.0
+  flutter_bluetooth_serial: ^0.4.0
+  lottie: ^3.1.2
+  permission_handler: ^12.0.1
+  record: ^6.2.0        
+  path_provider: ^2.1.2 
+  audioplayers: ^6.6.0 
+  path: ^1.9.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_launcher_icons: ^0.14.4
+  flutter_lints: ^6.0.0
+  flutter_native_splash: ^2.4.0
+
+
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/animations/
+    - assets/images/
+
+flutter_native_splash:
+  color: "#ffffff" 
+  image: assets/images/hope_signal.png 
+  android: true
+  ios: true
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/hope_signal.png"
+  min_sdk_android: 21 
+  remove_alpha_ios: true
+  
