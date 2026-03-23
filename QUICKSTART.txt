@@ -1,0 +1,99 @@
+⚡ QUICKSTART - Démarrage immédiat
+
+## 🎯 Les 3 étapes essentielles
+
+### Étape 1: Mise à jour ESP32 (5 min)
+```
+1. Ouvre: ESP32/trans/trans.ino
+2. Copie TOUT le contenu du fichier modifié (dans ce dossier)
+3. Paste dans l'Arduino IDE
+4. Board: "ESP32 Dev Module"
+5. Port: Ton port COM
+6. Upload
+7. Ouvre Serial Monitor (115200 baud)
+```
+
+### Étape 2: Teste le texte (2 min)
+```
+1. Lance l'app Flutter
+2. Connecte: "Hope_Signal_NODE2"
+3. Envoie: "Test"
+4. Vérifie Serial Monitor:
+   ✅ "✅ TEXTE OK: 'Test'"
+   ✅ "🔄 ACK envoyé (BT)"
+```
+
+**Si CRC ERROR:**
+→ Saute à "Déboguer CRC" en bas
+
+### Étape 3: Teste l'audio (2 min)
+```
+1. Appuie 5 sec sur le micro
+2. Relâche
+3. Vérifie logs:
+   ✅ "📦 Audio accumulé: X bytes"
+   ✅ "✅ Audio complètement"
+```
+
+---
+
+## ❌ SI CRC ERROR - DIAGNOSTIC RAPIDE
+
+```
+Serial Monitor montre:
+⚠️ CRC ERROR TEXTE - calc=0x8C received=0x??
+
+FIX 1: Bluetooth perte de données
+└─ Ajoute délai dans ble_repository_impl.dart:
+   await _connection!.output.allSent;
+   await Future.delayed(const Duration(milliseconds: 50));
+
+FIX 2: Mauvais CRC Flutter vs C++
+└─ Copie la fonction crc8() du trans.ino EXACT
+
+FIX 3: Texte avec accents ou caractères spéciaux
+└─ Teste d'abord juste: "Hello123"
+```
+
+---
+
+## 📁 Fichiers importants à comprendre
+
+| Fichier | Rôle | Modifié? |
+|---------|------|---------|
+| `ESP32/trans/trans.ino` | Protocole ESP32 | ✅ OUI |
+| `voice_manager.dart` | CRC + Packets | ✅ Légèrement |
+| `ble_repository_impl.dart` | Envoi Bluetooth | ✅ Log amélioré |
+| `voice_repository_impl.dart` | Compression + Chunks | ✅ Existant |
+| `voice_codec.cpp` | Compression RLE | ✅ Bon |
+
+---
+
+## 🧪 Tests dans l'ordre
+
+```
+TEST 1: Texte "Test"
+        └─ Doit fonctionner immédiatement
+
+TEST 2: Texte "Hello World!"
+        └─ Pour vérifier multi-bytes
+
+TEST 3: Audio 5 sec
+        └─ Après text OK
+
+TEST 4: RF433 relai
+        └─ Si disponible
+```
+
+---
+
+## 🚀 Go! C'est tout ce qu'il faut faire
+
+1. ✅ Upload trans.ino
+2. ✅ Teste "Test" en texte
+3. ✅ Si OK → teste audio
+4. ✅ Done!
+
+Si erreur CRC → Lire `CRC_DEBUGGING_GUIDE.md`
+
+Bon amusement! 🎉

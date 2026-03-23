@@ -39,12 +39,14 @@ class VoiceManager {
       // pour le mode audio, on encode un indicateur last chunk
       packet.add([isLastChunk ? 1 : 0]);
       packet.add(payload);
-      final crc = crc8(Uint8List.fromList([isLastChunk ? 1 : 0, ...payload]));
+      // CRC calcule sur [isLastChunk, payload...]
+      final crcData = Uint8List.fromList([isLastChunk ? 1 : 0, ...payload]);
+      final crc = crc8(crcData);
       packet.add([crc]);
       return packet.toBytes();
     }
 
-    // texte : ancien format (pas de champ lastChunk)
+    // texte : format [flag, seq, payload..., crc8(payload)]
     packet.add(payload);
     final crc = crc8(payload);
     packet.add([crc]);

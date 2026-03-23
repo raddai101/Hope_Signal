@@ -51,9 +51,24 @@ class BleRepositoryImpl implements BleRepository {
         seq,
         chunk,
       );
+
+      // Debug: afficher exact ce qui est envoyé
+      String packetHex = packet
+          .map((b) => b.toRadixString(16).padLeft(2, '0'))
+          .join(' ');
+      String payloadStr = utf8.decode(chunk, allowMalformed: true);
+      int crcActual = packet.isNotEmpty ? packet.last : 0;
+      int crcExpected = VoiceManager.crc8(chunk);
+
+      print("📤 TEXTE ENVOI:");
+      print("   - Texte: '$payloadStr'");
+      print("   - Paquet hex: [$packetHex]");
+      print("   - Taille: ${packet.length} bytes");
+      print("   - Flag: ${packet[0]} | Seq: ${packet[1]}");
       print(
-        "📤 TEXTE envoyé via BT: seq=$seq, size=${chunk.length}, packet=${packet.length} bytes",
+        "   - CRC envoyé: ${crcActual} | Attendu: ${crcExpected} | Match: ${crcActual == crcExpected}",
       );
+
       await _sendWithAck(packet, seq);
       seq = (seq + 1) & 0xFF;
     }
